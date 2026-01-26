@@ -59,10 +59,18 @@ function App() {
 
     } catch (error) {
       console.error("Search failed:", error);
-      if (error.message === "API Limit Reached" || error.message.includes("429") || error.message.includes("quota")) {
-        setErrorMsg("We are using a free API which has hit its limit. Please try again tomorrow.");
+
+      // 🛠️ Friendly Error Messages
+      if (error.message === "API Limit Reached") {
+        setErrorMsg("⚠️ Search limit reached. Please try again tomorrow.");
+      } else if (error.message === "Request Timeout") {
+        setErrorMsg("🐢 Internet is too slow. The request timed out. Please try again.");
+      } else if (error.message === "Network/CORS Error") {
+        setErrorMsg("🌐 Connection failed. Please check your internet connection.");
+      } else if (error.message === "Service Not Found (404)") {
+        setErrorMsg("🚫 Search service is offline. Please check N8N workflow status.");
       } else {
-        setErrorMsg("An unexpected error occurred. Please check your connection.");
+        setErrorMsg("❌ An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
