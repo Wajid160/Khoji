@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, User, MapPin } from 'lucide-react';
 
-const ResultCard = ({ result }) => {
+const ResultCard = ({ result, onClick }) => {
     const { name, title, link, description, location } = result;
 
     return (
@@ -11,7 +11,8 @@ const ResultCard = ({ result }) => {
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ duration: 0.3 }}
-            className="group relative h-full bg-card/60 backdrop-blur-md border border-white/10 dark:border-white/5 rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col"
+            onClick={onClick}
+            className="group relative h-full bg-card/60 backdrop-blur-md border border-white/10 dark:border-white/5 rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col cursor-pointer"
         >
             {/* Gradient Background Glow */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -54,6 +55,7 @@ const ResultCard = ({ result }) => {
                     href={link}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl font-semibold text-sm transition-all duration-300 group-hover:shadow-lg group-hover:shadow-primary/20"
                 >
                     <span>View Profile</span>

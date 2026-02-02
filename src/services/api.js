@@ -36,6 +36,65 @@ export const searchPerson = async (searchParams) => {
             const data = await response.json();
 
             // 🛡️ Robust Response Handling
+            console.log("N8N Response:", data);
+            console.log("N8N Response type:", typeof data);
+            console.log("Is Array?", Array.isArray(data));
+            console.log("Has linkedin?", data?.linkedin);
+            console.log("data[0]?", data?.[0]);
+
+            // Handle N8N grouped response: [{ linkedin: [...], facebook: [...], twitter: [...] }]
+            // OR direct object: { linkedin: [...], facebook: [...], twitter: [...] }
+            let result = null;
+
+            if (Array.isArray(data) && data.length > 0 && (data[0].linkedin || data[0].facebook || data[0].twitter)) {
+                result = data[0];
+            } else if (data && !Array.isArray(data) && (data.linkedin || data.facebook || data.twitter)) {
+                result = data;
+            }
+
+            if (result) {
+                console.log("✅ Detected N8N grouped format, transforming...");
+                const flatResults = [];
+
+                // Helper function to transform N8N data to frontend format
+                const transformItem = (item) => {
+                    // Extract name from title (first part before " - ")
+                    const titleParts = item.title ? item.title.split(' - ') : [];
+                    const name = titleParts[0] || item.title || 'Unknown';
+
+                    console.log("Transforming item:", item, "→ source:", item.platform);
+
+                    return {
+                        name: name.trim(),
+                        title: item.title || '',
+                        link: item.link || '',
+                        source: item.platform || 'Unknown',
+                        description: item.description || 'No description available.',
+                        location: item.location || '',
+                        confidence: item.confidence || 0
+                    };
+                };
+
+                // Convert grouped structure to flat array with proper field mapping
+                if (result.linkedin && Array.isArray(result.linkedin)) {
+                    console.log("Processing", result.linkedin.length, "LinkedIn items");
+                    flatResults.push(...result.linkedin.map(transformItem));
+                }
+                if (result.facebook && Array.isArray(result.facebook)) {
+                    console.log("Processing", result.facebook.length, "Facebook items");
+                    flatResults.push(...result.facebook.map(transformItem));
+                }
+                if (result.twitter && Array.isArray(result.twitter)) {
+                    console.log("Processing", result.twitter.length, "Twitter items");
+                    flatResults.push(...result.twitter.map(transformItem));
+                }
+
+                console.log("Transformed Results:", flatResults);
+                console.log("First result source:", flatResults[0]?.source);
+                return flatResults;
+            }
+
+            // Handle other response formats
             if (data.results && Array.isArray(data.results)) return data.results;
             if (Array.isArray(data)) return data;
             if (data.data && Array.isArray(data.data)) return data.data;

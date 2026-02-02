@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import SearchBar from './components/Search/SearchBar';
 import ResultCard from './components/Results/ResultCard';
+import PersonDetailModal from './components/Results/PersonDetailModal';
+import LoginModal from './components/Auth/LoginModal';
+import SignupModal from './components/Auth/SignupModal';
 import { searchPerson } from './services/api';
-import { Sun, Moon, Linkedin, Facebook, Twitter, Search, Info, X } from 'lucide-react';
+import { Sun, Moon, Linkedin, Facebook, Twitter, Search, Info, X, LogIn, UserPlus, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingOverlay from './components/UI/LoadingOverlay';
+import { useAuth } from './context/AuthContext';
 
 function App() {
+  const { user, logout, isAuthenticated } = useAuth();
   const [results, setResults] = useState({ linkedin: [], facebook: [], twitter: [] });
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [theme, setTheme] = useState('light');
   const [showAbout, setShowAbout] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  // Modal states
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [showPersonDetail, setShowPersonDetail] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Initialize theme
   useEffect(() => {
@@ -30,6 +42,18 @@ function App() {
       setTheme('light');
       document.documentElement.classList.remove('dark');
     }
+  };
+
+  // Handle person card click
+  const handlePersonClick = (person) => {
+    setSelectedPerson(person);
+    setShowPersonDetail(true);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
   };
 
   const handleSearch = async (params) => {
@@ -50,11 +74,17 @@ function App() {
       }
 
       // Categorize results
+      console.log("📊 Data received from API:", data);
+      console.log("📊 Data length:", data?.length);
+      console.log("📊 First item source:", data?.[0]?.source);
+      console.log("📊 All source values:", data?.map(r => r.source));
+
       const categorized = {
         linkedin: data.filter(r => r.source === 'LinkedIn'),
         facebook: data.filter(r => r.source === 'Facebook'),
         twitter: data.filter(r => r.source === 'Twitter')
       };
+      console.log("📊 Categorized results:", categorized);
       setResults(categorized);
 
     } catch (error) {
@@ -114,6 +144,63 @@ function App() {
             >
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
+
+            {/* Auth Buttons or User Menu */}
+            {!isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground transition-all duration-300 font-medium"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">Login</span>
+                </button>
+                <button
+                  onClick={() => setShowSignupModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-purple-600 text-white hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 font-medium"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sign Up</span>
+                </button>
+              </>
+            ) : (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-all duration-300"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden sm:inline font-medium">{user?.name}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+
+                {/* User Dropdown Menu */}
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-2 w-56 bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
+                    >
+                      <div className="p-4 border-b border-white/10">
+                        <p className="font-semibold truncate">{user?.name}</p>
+                        <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-3 text-left hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors flex items-center gap-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Logout</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -121,7 +208,26 @@ function App() {
       {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-6 pt-32 pb-20">
 
-        <div className="mb-20 text-center max-w-3xl mx-auto space-y-6">
+        {/* Hero Section with Background Image */}
+        <div className="mb-20 text-center max-w-3xl mx-auto space-y-6 relative">
+          {/* Background Image with Overlay */}
+          <div
+            className="absolute inset-0 -mx-6 -mt-10 -mb-20 rounded-3xl overflow-hidden"
+            style={{ zIndex: -1 }}
+          >
+            {/* Actual Background Image */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: 'url(/bkg_image.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            />
+            {/* Gradient Overlay - can adjust opacity here */}
+            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background" />
+          </div>
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter mb-6 bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent drop-shadow-sm">
             Find anyone, anywhere.
           </h1>
@@ -153,7 +259,7 @@ function App() {
                 <span className="text-xs font-bold bg-blue-600/10 text-blue-600 px-2.5 py-1 rounded-full ml-auto">{results.linkedin.length}</span>
               </div>
               <div className="flex flex-col gap-5">
-                {results.linkedin.length > 0 ? results.linkedin.map((r, i) => <ResultCard key={i} result={r} />) : <div className="p-6 text-center border border-dashed border-border rounded-xl text-muted-foreground bg-card/30">No results found</div>}
+                {results.linkedin.length > 0 ? results.linkedin.map((r, i) => <ResultCard key={i} result={r} onClick={() => handlePersonClick(r)} />) : <div className="p-6 text-center border border-dashed border-border rounded-xl text-muted-foreground bg-card/30">No results found</div>}
               </div>
             </div>
             {/* Facebook Column */}
@@ -164,7 +270,7 @@ function App() {
                 <span className="text-xs font-bold bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full ml-auto">{results.facebook.length}</span>
               </div>
               <div className="flex flex-col gap-5">
-                {results.facebook.length > 0 ? results.facebook.map((r, i) => <ResultCard key={i} result={r} />) : <div className="p-6 text-center border border-dashed border-border rounded-xl text-muted-foreground bg-card/30">No results found</div>}
+                {results.facebook.length > 0 ? results.facebook.map((r, i) => <ResultCard key={i} result={r} onClick={() => handlePersonClick(r)} />) : <div className="p-6 text-center border border-dashed border-border rounded-xl text-muted-foreground bg-card/30">No results found</div>}
               </div>
             </div>
             {/* Twitter Column */}
@@ -175,7 +281,7 @@ function App() {
                 <span className="text-xs font-bold bg-sky-500/10 text-sky-500 px-2.5 py-1 rounded-full ml-auto">{results.twitter.length}</span>
               </div>
               <div className="flex flex-col gap-5">
-                {results.twitter.length > 0 ? results.twitter.map((r, i) => <ResultCard key={i} result={r} />) : <div className="p-6 text-center border border-dashed border-border rounded-xl text-muted-foreground bg-card/30">No results found</div>}
+                {results.twitter.length > 0 ? results.twitter.map((r, i) => <ResultCard key={i} result={r} onClick={() => handlePersonClick(r)} />) : <div className="p-6 text-center border border-dashed border-border rounded-xl text-muted-foreground bg-card/30">No results found</div>}
               </div>
             </div>
           </div>
@@ -216,7 +322,7 @@ function App() {
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">A</div>
-                      <span className="font-medium">Asadullah Jamali</span>
+                      <span className="font-medium">Allah Bux Jamali</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">W</div>
@@ -237,6 +343,33 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSwitchToSignup={() => {
+          setShowLoginModal(false);
+          setShowSignupModal(true);
+        }}
+      />
+
+      {/* Signup Modal */}
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        onSwitchToLogin={() => {
+          setShowSignupModal(false);
+          setShowLoginModal(true);
+        }}
+      />
+
+      {/* Person Detail Modal */}
+      <PersonDetailModal
+        isOpen={showPersonDetail}
+        onClose={() => setShowPersonDetail(false)}
+        person={selectedPerson}
+      />
 
     </div>
   );
