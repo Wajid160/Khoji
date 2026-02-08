@@ -1,7 +1,7 @@
-# PersonFinder - Complete Project Documentation
+# Khoji - Complete Project Documentation
 ## Final Year Project (FYP) Guide
 
-**Project Name:** PersonFinder - Advanced OSINT Intelligence Across Social Networks  
+**Project Name:** Khoji - Advanced OSINT Intelligence Across Social Networks  
 **Team Members:**
 - Allah Bux Jamali
 - Wajid Bhatti

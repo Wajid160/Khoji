@@ -125,7 +125,7 @@ function App() {
               <Search className="w-5 h-5" />
             </div>
             <span className="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-              PersonFinder
+              Khoji
             </span>
           </div>
 
@@ -336,7 +336,7 @@ function App() {
                 </div>
 
                 <div className="mt-8 text-xs text-muted-foreground">
-                  © 2026 PersonFinder Project. All rights reserved.
+                  © 2026 Khoji Project. All rights reserved.
                 </div>
               </div>
             </motion.div>

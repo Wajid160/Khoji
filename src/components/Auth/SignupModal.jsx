@@ -74,7 +74,7 @@ const SignupModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                         </div>
 
                         <h2 className="text-2xl font-bold text-center mb-2">Create Account</h2>
-                        <p className="text-muted-foreground text-center mb-8">Join PersonFinder today</p>
+                        <p className="text-muted-foreground text-center mb-8">Join Khoji today</p>
 
                         {/* Error Message */}
                         {error && (

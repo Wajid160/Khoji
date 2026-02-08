@@ -16,13 +16,13 @@ export const AuthProvider = ({ children }) => {
 
     // Load user from localStorage on mount
     useEffect(() => {
-        const storedUser = localStorage.getItem('personFinderUser');
+        const storedUser = localStorage.getItem('khojiUser');
         if (storedUser) {
             try {
                 setUser(JSON.parse(storedUser));
             } catch (error) {
                 console.error('Failed to parse stored user:', error);
-                localStorage.removeItem('personFinderUser');
+                localStorage.removeItem('khojiUser');
             }
         }
         setIsLoading(false);
@@ -30,13 +30,13 @@ export const AuthProvider = ({ children }) => {
 
     // Get all users from localStorage
     const getAllUsers = () => {
-        const users = localStorage.getItem('personFinderUsers');
+        const users = localStorage.getItem('khojiUsers');
         return users ? JSON.parse(users) : [];
     };
 
     // Save all users to localStorage
     const saveAllUsers = (users) => {
-        localStorage.setItem('personFinderUsers', JSON.stringify(users));
+        localStorage.setItem('khojiUsers', JSON.stringify(users));
     };
 
     // Signup function
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         const userWithoutPassword = { ...newUser };
         delete userWithoutPassword.password;
         setUser(userWithoutPassword);
-        localStorage.setItem('personFinderUser', JSON.stringify(userWithoutPassword));
+        localStorage.setItem('khojiUser', JSON.stringify(userWithoutPassword));
 
         return userWithoutPassword;
     };
@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
         const userWithoutPassword = { ...foundUser };
         delete userWithoutPassword.password;
         setUser(userWithoutPassword);
-        localStorage.setItem('personFinderUser', JSON.stringify(userWithoutPassword));
+        localStorage.setItem('khojiUser', JSON.stringify(userWithoutPassword));
 
         return userWithoutPassword;
     };
@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }) => {
     // Logout function
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('personFinderUser');
+        localStorage.removeItem('khojiUser');
     };
 
     const value = {
