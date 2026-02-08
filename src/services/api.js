@@ -3,7 +3,7 @@ export const searchPerson = async (searchParams) => {
     // 🚧 STEP 1: PASTE YOUR N8N WEBHOOK URL HERE
     // ---------------------------------------------------------------------------
     // Example: "https://n8n.your-domain.com/webhook-test/person-finder"
-    const N8N_WEBHOOK_URL = "https://wajid7.app.n8n.cloud/webhook/person-finder";
+    const N8N_WEBHOOK_URL = "https://wajid2912.app.n8n.cloud/webhook/person-finder";
 
     // ---------------------------------------------------------------------------
     // 🚦 STEP 2: SET THIS TO 'true' TO USE REAL N8N BACKEND
