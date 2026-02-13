@@ -1,58 +1,95 @@
-# Person Finder - OSINT Intelligence Tool 🕵️‍♂️
-> **Final Year Project (FYP) - University of Sindh (Batch 2k22-IT)**
+# Khoji — OSINT People Search 🔍
 
-**Person Finder** is an advanced OSINT (Open Source Intelligence) tool designed to aggregate and visualize public profile information from major social networks (LinkedIn, Facebook, Twitter/X) in a single, unified interface.
+**Khoji** is an advanced OSINT (Open Source Intelligence) web application that finds people across **LinkedIn**, **Facebook**, and **Twitter/X** using a single search query. It aggregates public profile data and presents results in a clean, unified interface.
 
-![Person Finder UI](./public/vite.svg) *Note: Replace with actual screenshot*
+## ✨ Features
 
-## 🚀 Features
-*   **Multi-Platform Search**: Simultaneously scans LinkedIn, Facebook, and Twitter.
-*   **Smart Filtering**: Filters results by Name, Location, University, and Company.
-*   **Premium UI**: Glassmorphism design with dark/light mode support.
-*   **Real-time Feedback**: Interactive loading states and error handling.
-*   **Responsive**: Fully optimized for desktop and mobile devices.
+- **Multi-Platform Search** — Simultaneously searches LinkedIn, Facebook, and Twitter
+- **Smart Filtering** — Filter results by name, location, university, and company
+- **Detailed Profile Views** — Click any result for a rich detail modal with direct profile links
+- **User Authentication** — Sign up / login with session persistence
+- **Dark & Light Mode** — System-aware theme toggle with smooth transitions
+- **Responsive Design** — Fully optimized for desktop and mobile
+- **Beautiful UI** — Glassmorphism design, animated blobs, Framer Motion transitions
 
 ## 🛠️ Tech Stack
-*   **Frontend**: React (Vite), Tailwind CSS, Framer Motion (Animations).
-*   **Backend / Workflow**: N8N (Workflow Automation Tool).
-*   **API**: Google Custom Search API (via N8N).
-*   **Icons**: Lucide React.
 
-## 📦 Installation & Setup
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 19, Vite 7 |
+| **Styling** | Tailwind CSS 4, Framer Motion |
+| **Icons** | Lucide React |
+| **Backend** | N8N Workflow Automation |
+| **Search API** | Google Custom Search (via N8N) |
 
-### 1. Clone the Repository
+## 📦 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Installation
+
 ```bash
 git clone https://github.com/Wajid160/PersonFinder-FYP.git
-cd person-finder
-```
-
-### 2. Install Dependencies
-```bash
+cd PersonFinder-FYP
 npm install
 ```
 
-### 3. Configure Environment
-(Optional) If you have local environment variables, create a `.env` file.
-Currently, the API endpoint is configured in `src/services/api.js`.
+### Configuration
 
-### 4. Run Locally
-```bash
-npm run dev
-// Opens at http://localhost:5173
+Create a `.env` file in the project root (optional — falls back to the default endpoint):
+
+```env
+VITE_N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook/person-finder
 ```
 
-## ⚙️ Backend Configuration (N8N)
-This project uses **N8N** to handle the Google Search logic.
-1.  Import the provided `n8n_workflow_v4.json` into your N8N instance.
-2.  Setup Google Custom Search API credentials in N8N.
-3.  Activate the workflow.
-4.  Update the `N8N_WEBHOOK_URL` in `src/services/api.js` if your N8N instance changes.
+### Run Development Server
 
-## 👥 Meet the Team
-**Developed by Batch 2k22-IT:**
-*   **Asadullah Jamali**
-*   **Wajid Bhatti**
-*   **Abdul Manan**
+```bash
+npm run dev
+# Opens at http://localhost:5173
+```
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+## 🏗️ Project Structure
+
+```
+src/
+├── components/
+│   ├── Auth/           # Login & Signup modals
+│   ├── Results/        # ResultCard & PersonDetailModal
+│   ├── Search/         # SearchBar with advanced filters
+│   └── UI/             # LoadingOverlay with step animation
+├── context/
+│   └── AuthContext.jsx  # Authentication state management
+├── services/
+│   └── api.js           # N8N webhook integration & data transform
+├── App.jsx              # Root component
+├── index.css            # Tailwind + design tokens (light/dark)
+└── main.jsx             # Entry point
+```
+
+## ⚙️ Backend (N8N)
+
+The search backend is powered by an N8N workflow that:
+
+1. Receives the search query via webhook
+2. Runs optimized Google searches for each platform (`site:linkedin.com/in`, `site:facebook.com`, `site:twitter.com`)
+3. Parses and structures the results
+4. Returns categorized JSON: `{ linkedin: [...], facebook: [...], twitter: [...] }`
+
+To set up your own N8N instance:
+1. Create an account at [n8n.io](https://n8n.io)
+2. Configure Google Custom Search API credentials
+3. Set the webhook URL in your `.env` file
 
 ## 📄 License
-This project is for educational purposes as part of the University of Sindh FYP curriculum.
+
+MIT — Built by **Wajid Javed**

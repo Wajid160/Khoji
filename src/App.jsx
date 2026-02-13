@@ -5,7 +5,7 @@ import PersonDetailModal from './components/Results/PersonDetailModal';
 import LoginModal from './components/Auth/LoginModal';
 import SignupModal from './components/Auth/SignupModal';
 import { searchPerson } from './services/api';
-import { Sun, Moon, Linkedin, Facebook, Twitter, Search, Info, X, LogIn, UserPlus, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
+import { Sun, Moon, Linkedin, Facebook, Twitter, Search, X, LogIn, UserPlus, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingOverlay from './components/UI/LoadingOverlay';
 import { useAuth } from './context/AuthContext';
@@ -16,7 +16,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [theme, setTheme] = useState('light');
-  const [showAbout, setShowAbout] = useState(false);
+
   const [errorMsg, setErrorMsg] = useState(null);
 
   // Modal states
@@ -74,17 +74,11 @@ function App() {
       }
 
       // Categorize results
-      console.log("📊 Data received from API:", data);
-      console.log("📊 Data length:", data?.length);
-      console.log("📊 First item source:", data?.[0]?.source);
-      console.log("📊 All source values:", data?.map(r => r.source));
-
       const categorized = {
         linkedin: data.filter(r => r.source === 'LinkedIn'),
         facebook: data.filter(r => r.source === 'Facebook'),
         twitter: data.filter(r => r.source === 'Twitter')
       };
-      console.log("📊 Categorized results:", categorized);
       setResults(categorized);
 
     } catch (error) {
@@ -130,13 +124,7 @@ function App() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <button
-              onClick={() => setShowAbout(true)}
-              className="p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground transition-all duration-300 hover:rotate-12"
-              title="About Project"
-            >
-              <Info className="w-5 h-5" />
-            </button>
+
 
             <button
               onClick={toggleTheme}
@@ -288,61 +276,7 @@ function App() {
         )}
       </main>
 
-      {/* About Modal */}
-      <AnimatePresence>
-        {showAbout && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            onClick={() => setShowAbout(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-card w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-white/10 relative"
-            >
-              <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-primary/20 to-purple-600/20 z-0" />
-              <button onClick={() => setShowAbout(false)} className="absolute top-4 right-4 p-2 bg-black/10 hover:bg-black/20 rounded-full z-20 transition-colors">
-                <X className="w-5 h-5" />
-              </button>
 
-              <div className="relative z-10 p-8 pt-10 text-center">
-                <div className="w-20 h-20 bg-gradient-to-tr from-primary to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-xl mx-auto mb-6 text-3xl font-bold">
-                  P
-                </div>
-                <h2 className="text-2xl font-bold mb-2">FYP Project</h2>
-                <p className="text-primary font-medium mb-6">University of Sindh, Batch 2k22-IT</p>
-
-                <div className="bg-secondary/50 rounded-2xl p-6 text-left space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Group Members</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">A</div>
-                      <span className="font-medium">Allah Bux Jamali</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">W</div>
-                      <span className="font-medium">Wajid Bhatti</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">A</div>
-                      <span className="font-medium">Abdul Manan</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-8 text-xs text-muted-foreground">
-                  © 2026 Khoji Project. All rights reserved.
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Login Modal */}
       <LoginModal

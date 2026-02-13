@@ -1,7 +1,9 @@
 {
   "name": "khoji",
+  "description": "Advanced OSINT intelligence tool for searching people across social networks",
+  "author": "Wajid Javed",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

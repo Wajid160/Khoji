@@ -1,169 +1,85 @@
+const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || "https://wajid2912.app.n8n.cloud/webhook/person-finder";
+
+/**
+ * Search for a person across LinkedIn, Facebook, and Twitter
+ * via the N8N webhook backend.
+ */
 export const searchPerson = async (searchParams) => {
-    // ---------------------------------------------------------------------------
-    // 🚧 STEP 1: PASTE YOUR N8N WEBHOOK URL HERE
-    // ---------------------------------------------------------------------------
-    // Example: "https://n8n.your-domain.com/webhook-test/person-finder"
-    const N8N_WEBHOOK_URL = "https://wajid2912.app.n8n.cloud/webhook/person-finder";
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-    // ---------------------------------------------------------------------------
-    // 🚦 STEP 2: SET THIS TO 'true' TO USE REAL N8N BACKEND
-    // ---------------------------------------------------------------------------
-    const USE_REAL_BACKEND = true;
+    try {
+        const response = await fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(searchParams),
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
 
-
-    console.log("Initiating Search:", searchParams);
-
-    if (USE_REAL_BACKEND && N8N_WEBHOOK_URL) {
-        // ⏳ Add 60-second timeout for slow internet
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-        try {
-            const response = await fetch(N8N_WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(searchParams),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-                if (response.status === 404) throw new Error("Service Not Found (404)");
-                if (response.status >= 500) throw new Error("Server Error");
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            // 🛡️ Robust Response Handling
-            console.log("N8N Response:", data);
-            console.log("N8N Response type:", typeof data);
-            console.log("Is Array?", Array.isArray(data));
-            console.log("Has linkedin?", data?.linkedin);
-            console.log("data[0]?", data?.[0]);
-
-            // Handle N8N grouped response: [{ linkedin: [...], facebook: [...], twitter: [...] }]
-            // OR direct object: { linkedin: [...], facebook: [...], twitter: [...] }
-            let result = null;
-
-            if (Array.isArray(data) && data.length > 0 && (data[0].linkedin || data[0].facebook || data[0].twitter)) {
-                result = data[0];
-            } else if (data && !Array.isArray(data) && (data.linkedin || data.facebook || data.twitter)) {
-                result = data;
-            }
-
-            if (result) {
-                console.log("✅ Detected N8N grouped format, transforming...");
-                const flatResults = [];
-
-                // Helper function to transform N8N data to frontend format
-                const transformItem = (item) => {
-                    // Extract name from title (first part before " - ")
-                    const titleParts = item.title ? item.title.split(' - ') : [];
-                    const name = titleParts[0] || item.title || 'Unknown';
-
-                    console.log("Transforming item:", item, "→ source:", item.platform);
-
-                    return {
-                        name: name.trim(),
-                        title: item.title || '',
-                        link: item.link || '',
-                        source: item.platform || 'Unknown',
-                        description: item.description || 'No description available.',
-                        location: item.location || '',
-                        confidence: item.confidence || 0
-                    };
-                };
-
-                // Convert grouped structure to flat array with proper field mapping
-                if (result.linkedin && Array.isArray(result.linkedin)) {
-                    console.log("Processing", result.linkedin.length, "LinkedIn items");
-                    flatResults.push(...result.linkedin.map(transformItem));
-                }
-                if (result.facebook && Array.isArray(result.facebook)) {
-                    console.log("Processing", result.facebook.length, "Facebook items");
-                    flatResults.push(...result.facebook.map(transformItem));
-                }
-                if (result.twitter && Array.isArray(result.twitter)) {
-                    console.log("Processing", result.twitter.length, "Twitter items");
-                    flatResults.push(...result.twitter.map(transformItem));
-                }
-
-                console.log("Transformed Results:", flatResults);
-                console.log("First result source:", flatResults[0]?.source);
-                return flatResults;
-            }
-
-            // Handle other response formats
-            if (data.results && Array.isArray(data.results)) return data.results;
-            if (Array.isArray(data)) return data;
-            if (data.data && Array.isArray(data.data)) return data.data;
-            return [data];
-
-        } catch (error) {
-            clearTimeout(timeoutId);
-            console.error("N8N Error:", error);
-
-            // 🛑 Handle specific error types
-            if (error.name === 'AbortError') {
-                throw new Error("Request Timeout");
-            }
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                // This captures CORS errors or total offline stats
-                throw new Error("Network/CORS Error");
-            }
-            throw error;
+        if (!response.ok) {
+            if (response.status === 404) throw new Error("Service Not Found (404)");
+            if (response.status >= 500) throw new Error("Server Error");
+            throw new Error("Network response was not ok");
         }
-    }
 
-    // ---------------------------------------------------------------------------
-    // 🧪 MOCK DATA (Fallback)
-    // ---------------------------------------------------------------------------
-    console.log("Using Mock Data...");
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve([
-                {
-                    name: searchParams.query || "John Doe",
-                    title: "Senior Software Engineer at Google",
-                    link: "https://linkedin.com/in/johndoe",
-                    source: "LinkedIn",
-                    description: "Passionate engineer with 10+ years of experience in distributed systems and AI. Alumnus of Stanford University.",
-                    location: searchParams.location || "San Francisco, CA"
-                },
-                {
-                    name: searchParams.query || "John Doe",
-                    title: "Product Manager",
-                    link: "https://linkedin.com/in/johndoe2",
-                    source: "LinkedIn",
-                    description: "Building the future of fintech. Previously at Stripe and PayPal.",
-                    location: "New York, NY"
-                },
-                {
-                    name: searchParams.query || "John Doe",
-                    title: "Profile",
-                    link: "https://facebook.com/johndoe",
-                    source: "Facebook",
-                    description: "Lives in San Francisco. Studied at Stanford.",
-                    location: "San Francisco, CA"
-                },
-                {
-                    name: `${searchParams.query || "John"} D.`,
-                    title: "@johndoe",
-                    link: "https://twitter.com/johndoe",
-                    source: "Twitter",
-                    description: "Tech enthusiast. Python lover. Views are my own. #coding #life",
-                    location: "Global"
-                },
-                {
-                    name: "JD Dev",
-                    title: "@jd_dev",
-                    link: "https://twitter.com/jd_dev",
-                    source: "Twitter",
-                    description: "Building cool stuff 24/7.",
-                    location: "Remote"
-                }
-            ]);
-        }, 1000);
-    });
+        const data = await response.json();
+
+        // Handle N8N grouped response: { linkedin: [...], facebook: [...], twitter: [...] }
+        let result = null;
+
+        if (Array.isArray(data) && data.length > 0 && (data[0].linkedin || data[0].facebook || data[0].twitter)) {
+            result = data[0];
+        } else if (data && !Array.isArray(data) && (data.linkedin || data.facebook || data.twitter)) {
+            result = data;
+        }
+
+        if (result) {
+            const flatResults = [];
+
+            const transformItem = (item) => {
+                const titleParts = item.title ? item.title.split(' - ') : [];
+                const name = titleParts[0] || item.title || 'Unknown';
+
+                return {
+                    name: name.trim(),
+                    title: item.title || '',
+                    link: item.link || '',
+                    source: item.platform || 'Unknown',
+                    description: item.description || 'No description available.',
+                    location: item.location || '',
+                    confidence: item.confidence || 0
+                };
+            };
+
+            if (result.linkedin && Array.isArray(result.linkedin)) {
+                flatResults.push(...result.linkedin.map(transformItem));
+            }
+            if (result.facebook && Array.isArray(result.facebook)) {
+                flatResults.push(...result.facebook.map(transformItem));
+            }
+            if (result.twitter && Array.isArray(result.twitter)) {
+                flatResults.push(...result.twitter.map(transformItem));
+            }
+
+            return flatResults;
+        }
+
+        // Handle other response formats
+        if (data.results && Array.isArray(data.results)) return data.results;
+        if (Array.isArray(data)) return data;
+        if (data.data && Array.isArray(data.data)) return data.data;
+        return [data];
+
+    } catch (error) {
+        clearTimeout(timeoutId);
+
+        if (error.name === 'AbortError') {
+            throw new Error("Request Timeout");
+        }
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            throw new Error("Network/CORS Error");
+        }
+        throw error;
+    }
 };
